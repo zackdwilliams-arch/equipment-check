@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Equipment Check</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap">
+<style>
+:root {
+  --bg: #f1f4f3; --surface: #ffffff; --ink: #15201e; --muted: #586764; --line: #d3dbd8;
+  --accent: #0f5f6b; --accent-ink: #ffffff;
+  --ok: #1c7441; --ok-bg: #e0f2e6; --warn: #8f5400; --warn-bg: #fcedcf; --stop: #b3261e; --stop-bg: #fbe2df;
+  --display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --bg: #0f1514; --surface: #18201e; --ink: #e7eeec; --muted: #9baba7; --line: #2b3735;
+  --accent: #5cc4d1; --accent-ink: #05252a;
+  --ok: #72d49a; --ok-bg: #153323; --warn: #f1bc5b; --warn-bg: #392b0d; --stop: #ff8d83; --stop-bg: #421a17;
+  color-scheme: dark } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.4; }
+#app { max-width: 480px; margin: 0 auto; padding-block: 0 120px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, .big { font-family: var(--display); font-weight: 700; letter-spacing: .01em; text-wrap: balance; margin: 0; }
+h1 { font-size: 30px; line-height: 1.05; }
+h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 22px 0 8px; }
+p { margin: 0; }
+.muted { color: var(--muted); font-size: 14px; }
+.head { padding: 14px 0 10px; border-bottom: 1px solid var(--line); }
+.head b { display: block; font-family: var(--display); font-size: 26px; line-height: 1.1; }
+.back { background: none; border: 0; color: var(--accent); font: 600 15px var(--body); padding: 8px 4px; min-height: 46px; }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+.cta { display: block; width: 100%; border: 0; border-radius: 10px; padding: 18px; font: 700 22px var(--display); letter-spacing: .03em;
+  background: var(--accent); color: var(--accent-ink); min-height: 64px; }
+.cta.stop { background: var(--stop); color: #fff; }
+.cta:disabled { opacity: .5; }
+.big-btn { display: block; width: 100%; min-height: 56px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface);
+  color: var(--ink); font: 600 20px var(--body); text-align: left; padding: 0 16px; }
+.row { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; }
+.seg button { flex: 1 1 90px; min-height: 46px; padding: 0 12px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--bg); color: var(--muted); font: 600 15px var(--body); }
+.seg button.on.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+.seg button.on.warn { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); }
+.seg button.on.stop { background: var(--stop-bg); border-color: var(--stop); color: var(--stop); }
+.say { padding: 10px 12px; border-radius: 8px; font-weight: 600; margin-top: 10px; }
+.say.warn { background: var(--warn-bg); color: var(--warn); } .say.stop { background: var(--stop-bg); color: var(--stop); }
+input[type=text], textarea { width: 100%; font: 500 17px var(--body); padding: 12px; border-radius: 8px;
+  border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); min-height: 46px; }
+textarea { min-height: 76px; resize: vertical; }
+.photo { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 14px; border-radius: 8px; border: 1.5px solid var(--accent); color: var(--accent); font-weight: 600; background: none; cursor: pointer; white-space: nowrap; }
+.photo input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.thumb { position: relative; }
+.thumb img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; display: block; }
+.thumb button { position: absolute; top: -8px; right: -8px; width: 46px; height: 46px; background: none; border: 0; padding: 0; }
+.thumb button span { display: block; width: 24px; height: 24px; margin: 0 0 0 22px; border-radius: 50%; background: var(--ink); color: var(--bg); font: 700 16px/24px var(--body); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips button { min-height: 46px; padding: 0 14px; border-radius: 23px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font: 500 15px var(--body); }
+.chips button.on { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); font-weight: 700; }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--bg); border-top: 1px solid var(--line); z-index: 6;
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.bar > div { max-width: 480px; margin: 0 auto; }
+.bar .hint { font-size: 14px; color: var(--stop); margin-bottom: 6px; text-align: center; font-weight: 600; }
+.banner { margin-top: 14px; padding: 16px; border-radius: 10px; }
+.banner .big { font-size: 34px; line-height: 1; }
+.banner.warn { background: var(--warn-bg); color: var(--warn); } .banner.stop { background: var(--stop); color: #fff; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 15px; }
+button { cursor: pointer; } button:focus-visible, .photo:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div id="app"><p class="muted" style="padding-top:24px">Loading&hellip;</p></div>
+<script>
+var RULES = {"issue_categories": ["Won't start", "Fluid leak", "Hydraulics", "Tires / tracks", "Blades / deck", "Lights / electrical", "Brakes", "Damage", "Other"], "leak_category": "Fluid leak", "leak_answers": ["none", "drip", "active"], "lockout_when": [{"category": "Fluid leak", "leak": "active"}]};
+var EQ = (new URLSearchParams(location.search).get('eq') || '').slice(0, 200);
+var KEY = (new URLSearchParams(location.search).get('k') || '').slice(0, 200);
+// Where the static build posts. Blank in the Apps Script build, which uses google.script.run.
+var API_URL = "https://script.google.com/macros/s/AKfycbwNd8BDevvicxK8lrmDzt8SApMrBD4OjNRDz1Pwe5WezKC1SdA8oNTKs6F9q_xydcMU/exec";
+var LEAK_LABEL = {none: 'No leak', drip: 'Slow drip', active: 'Active leak'};
+var LEAK_TONE = {none: 'ok', drip: 'warn', active: 'stop'};
+var MAX_PHOTOS = 4;
+var MAX_EDGE = 1600;
+
+var S = {view: 'loading', m: null, name: '', other: false, nameNext: null, form: null, result: null};
+var app = document.getElementById('app');
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c];
+  });
+}
+function loadName() { try { return localStorage.getItem('eq_name') || ''; } catch (e) { return ''; } }
+function saveName(n) { try { localStorage.setItem('eq_name', n); } catch (e) {} }
+function newId() {
+  try { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+  return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12) + Math.random().toString(36).slice(2, 8);
+}
+function shortDate(s) {
+  var d = new Date(s);
+  if (isNaN(d.getTime())) return String(s || '');
+  return d.toLocaleDateString(undefined, {month: 'short', day: 'numeric'});
+}
+function willLock(f) {
+  return RULES.lockout_when.some(function (r) { return r.category === f.cat && (r.leak || '') === (f.leak || ''); });
+}
+
+// One transport for every server call. Inside Apps Script it is google.script.run;
+// on the static page it is a cookieless POST. text/plain keeps the request "simple",
+// so the browser sends no CORS preflight (Apps Script does not answer one).
+function call(fn, args, onOk, onFail) {
+  if (window.google && google.script && google.script.run) {
+    var run = google.script.run.withSuccessHandler(onOk).withFailureHandler(onFail);
+    run[fn].apply(run, args);
+    return;
+  }
+  var body = fn === 'getMachine' ? {fn: fn, eq: args[0], k: args[1]} : {fn: fn, payload: args[0]};
+  // A hung request must not freeze the page: abort it and take the same path as a network error.
+  // Resending is safe, the server dedupes by submission id. No AbortController: no timeout, no crash.
+  var ctl = typeof AbortController === 'function' ? new AbortController() : null;
+  var timer = ctl ? setTimeout(function () { ctl.abort(); }, fn === 'submitIssue' ? 90000 : 30000) : null;
+  function stop() { if (timer) clearTimeout(timer); }
+  var opts = {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'},
+    body: JSON.stringify(body), credentials: 'omit', redirect: 'follow', cache: 'no-store'};
+  if (ctl) opts.signal = ctl.signal;
+  try {
+    fetch(API_URL, opts)
+      .then(function (res) {
+        if (!res.ok) throw new Error('status');
+        return res.json();
+      })
+      .then(function (j) { stop(); onOk(j); }, function (err) { stop(); onFail(err); });
+  } catch (e) { stop(); onFail(e); }
+}
+
+function load() {
+  S.view = 'loading'; render();
+  if (!EQ) { S.view = 'unknown'; render(); return; }
+  call('getMachine', [EQ, KEY], function (m) {
+    if (m && m.ok === false) S.view = 'neterr';
+    else if (!m || !m.found) S.view = 'unknown';
+    else { S.m = m; S.view = 'machine'; }
+    render();
+  }, function () {
+    S.view = 'neterr'; render();
+  });
+}
+
+function head() {
+  return '<div class="head"><b>' + esc(S.m.name) + '</b><span class="muted">' + esc(S.m.equip_id) + '</span></div>';
+}
+function bannerHtml(kind, title, text) {
+  return '<div class="banner ' + kind + '"><div class="big">' + esc(title) + '</div><p style="margin-top:6px">' + esc(text) + '</p></div>';
+}
+
+function vMachine() {
+  var m = S.m, h = head();
+  if (m.locked_out) {
+    h += bannerHtml('stop', 'LOCKED OUT', 'Do not operate. ' + (m.lock_reason || '') + '. The fleet mechanic or supervisor clears this.');
+  }
+  h += '<div class="stack" style="margin-top:18px">';
+  (m.open_issues || []).forEach(function (o, i) {
+    h += '<div class="card"><b>Already reported: ' + esc(o.title) + '</b><p class="muted">' + esc(shortDate(o.reported_at)) +
+      ' &middot; ' + esc(o.status) + '</p><button class="back" type="button" data-act="same" data-i="' + i + '">Same problem? Add a note or photo</button></div>';
+  });
+  h += '<button class="cta" type="button" data-act="report">REPORT A PROBLEM</button></div>';
+  if (S.name) h += '<p class="muted" style="margin-top:14px">Reporting as ' + esc(S.name) + ' &middot; <button class="back" type="button" data-act="change">change</button></p>';
+  return h;
+}
+
+function vName() {
+  var h = head() + '<h2>Who\'s reporting?</h2><div class="stack">';
+  (S.m.crew_names || []).forEach(function (n, i) {
+    h += '<button class="big-btn" type="button" data-act="pick" data-i="' + i + '">' + esc(n) + '</button>';
+  });
+  h += '<button class="big-btn" type="button" data-act="someone">Someone else</button>';
+  if (S.other) {
+    h += '<input type="text" id="other" maxlength="60" placeholder="Your name" autocomplete="off">' +
+      '<button class="cta" type="button" id="otherGo" data-act="otherok" disabled>CONTINUE</button>';
+  }
+  return h + '</div><button class="back" type="button" data-act="back" style="margin-top:12px">&#8592; Back</button>';
+}
+
+function photoControl(f) {
+  var h = '';
+  if (f.photos.length < MAX_PHOTOS) {
+    h += '<label class="photo"><span>' + (f.photos.length ? 'Add another photo' : 'Add photo') +
+      '</span><input type="file" accept="image/*" capture="environment" id="photoIn"></label>';
+  }
+  if (f.busy) h += '<p class="muted" style="margin-top:8px">Preparing photo&hellip;</p>';
+  if (f.photoErr) h += '<p class="muted" style="margin-top:8px">Could not read that photo.</p>';
+  if (f.photos.length) {
+    h += '<div class="thumbs">' + f.photos.map(function (p, i) {
+      return '<div class="thumb"><img src="' + esc(p.preview) + '" alt="Photo ' + (i + 1) + '"><button type="button" data-act="rmphoto" data-i="' + i +
+        '" aria-label="Remove photo ' + (i + 1) + '"><span>&times;</span></button></div>';
+    }).join('') + '</div>';
+  }
+  return h;
+}
+
+function bar(f) {
+  var label, dis = false, cls = '';
+  if (f.sending) { label = 'SENDING…'; dis = true; }
+  else if (f.same) { label = 'ADD TO THE OPEN ISSUE'; dis = f.busy; }
+  else if (!f.cat || (f.cat === RULES.leak_category && !f.leak)) { label = 'PICK WHAT IS WRONG'; dis = true; }
+  else if (willLock(f)) { label = 'SUBMIT AND LOCK OUT'; cls = ' stop'; dis = f.busy; }
+  else { label = 'SUBMIT'; dis = f.busy; }
+  return '<div class="bar"><div>' + (f.error ? '<div class="hint">' + esc(f.error) + '</div>' : '') +
+    '<button class="cta' + cls + '" type="button" data-act="submit"' + (dis ? ' disabled' : '') + '>' + label + '</button></div></div>';
+}
+
+function vForm() {
+  var f = S.form, h = head();
+  h += '<button class="back" type="button" data-act="back">&#8592; Back</button>';
+  if (f.same) {
+    h += '<h2>Adding to an open issue</h2><div class="card"><b>' + esc(f.same.title) + '</b><p class="muted">' +
+      esc(shortDate(f.same.reported_at)) + ' &middot; ' + esc(f.same.status) + '</p></div>';
+  } else {
+    h += '<h2>What is wrong?</h2><div class="chips">' + S.m.categories.map(function (c, i) {
+      return '<button type="button" data-act="cat" data-i="' + i + '" class="' + (f.cat === c ? 'on' : '') + '" aria-pressed="' + (f.cat === c) + '">' + esc(c) + '</button>';
+    }).join('') + '</div>';
+    if (f.cat && f.cat === S.m.leak_category) {
+      h += '<h2>How bad is the leak?</h2><div class="row"><div class="seg">' + S.m.leak_answers.map(function (a) {
+        return '<button type="button" data-act="leak" data-v="' + esc(a) + '" class="' + (f.leak === a ? 'on ' + (LEAK_TONE[a] || 'warn') : '') + '" aria-pressed="' + (f.leak === a) + '">' + esc(LEAK_LABEL[a] || a) + '</button>';
+      }).join('') + '</div>';
+      if (f.leak) {
+        h += willLock(f) ? '<div class="say stop">Do not operate. An active leak locks this machine out.</div>'
+          : '<div class="say warn">Keep working. The fleet mechanic gets a repair request.</div>';
+      }
+      h += '</div>';
+    }
+  }
+  h += '<h2>Details (optional)</h2><textarea id="desc" maxlength="1000" placeholder="A few words help the fleet mechanic">' + esc(f.desc) + '</textarea>';
+  h += '<div style="margin-top:10px" id="photoArea">' + photoControl(f) + '</div>';
+  return h + bar(f);
+}
+
+function vResult() {
+  var r = S.result, h = '<div style="padding-top:20px"></div>';
+  if (r.lock) h += bannerHtml('stop', 'DO NOT OPERATE', 'This machine is locked out. Hang the tag on the key and leave it parked.');
+  else if (r.same) h += bannerHtml('warn', 'ADDED TO THE OPEN ISSUE', 'The fleet mechanic already has this one. Your note and photo were added.');
+  else h += bannerHtml('warn', 'SENT TO THE FLEET MECHANIC', 'You can keep working. The repair request is in.');
+  return h + '<div style="margin-top:18px"><button class="cta" type="button" data-act="done">DONE</button></div>';
+}
+
+function render() {
+  var v = S.view;
+  if (v === 'unknown') app.innerHTML = '<div style="padding-top:28px"><h1>This sticker isn\'t recognized. Tell your supervisor.</h1></div>';
+  else if (v === 'neterr') app.innerHTML = '<div style="padding-top:28px"><h1>Could not load. Check your signal.</h1><div style="margin-top:16px"><button class="cta" type="button" data-act="retryload">TRY AGAIN</button></div></div>';
+  else if (v === 'msg') app.innerHTML = '<div style="padding-top:28px"><h1>' + esc(S.msg) + '</h1><div style="margin-top:16px"><button class="cta" type="button" data-act="done">BACK TO THE MACHINE</button></div></div>';
+  else if (v === 'machine') app.innerHTML = vMachine();
+  else if (v === 'name') app.innerHTML = vName();
+  else if (v === 'form') app.innerHTML = vForm();
+  else if (v === 'result') app.innerHTML = vResult();
+  else app.innerHTML = '<p class="muted" style="padding-top:24px">Loading&hellip;</p>';
+  window.scrollTo(0, 0);
+}
+function rerenderKeepScroll() {
+  var y = window.pageYOffset; render(); window.scrollTo(0, y);
+}
+
+// Refresh only the photo strip and the submit bar, so the details box keeps its text, focus and caret.
+function refreshPhotos() {
+  var f = S.form, a = document.getElementById('photoArea'), b = document.querySelector('.bar');
+  if (!a || !b) return;
+  a.innerHTML = photoControl(f);
+  b.outerHTML = bar(f);
+}
+
+function openForm(same) {
+  S.form = {sid: newId(), same: same || null, cat: '', leak: '', desc: '', photos: [], busy: 0, photoErr: false, sending: false, error: ''};
+  S.view = 'form'; render();
+}
+function startReport(same) {
+  if (!S.name) { S.nameNext = function () { openForm(same); }; S.other = false; S.view = 'name'; render(); }
+  else openForm(same);
+}
+function chooseName(n) {
+  S.name = n; saveName(n);
+  var next = S.nameNext; S.nameNext = null;
+  if (next) next(); else { S.view = 'machine'; render(); }
+}
+
+function downscale(file, cb) {
+  var url = URL.createObjectURL(file), img = new Image();
+  img.onload = function () {
+    try {
+      var w = img.naturalWidth, h = img.naturalHeight, s = Math.min(1, MAX_EDGE / Math.max(w, h));
+      var c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(w * s)); c.height = Math.max(1, Math.round(h * s));
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      var data = c.toDataURL('image/jpeg', 0.8);
+      URL.revokeObjectURL(url);
+      cb(data);
+    } catch (e) { URL.revokeObjectURL(url); cb(null); }
+  };
+  img.onerror = function () { URL.revokeObjectURL(url); cb(null); };
+  img.src = url;
+}
+
+function submit() {
+  var f = S.form;
+  if (f.sending) return;
+  f.sending = true; f.error = ''; rerenderKeepScroll();
+  var payload = {
+    submission_id: f.sid, equip_id: EQ, key: KEY, submitter: S.name,
+    category: f.same ? '' : f.cat, leak: f.same ? '' : f.leak, description: f.desc,
+    same_issue_id: f.same ? f.same.id : '',
+    photos: f.photos.map(function (p, i) { return {name: 'photo' + (i + 1) + '.jpg', mime: 'image/jpeg', base64: p.base64}; })
+  };
+  function fail() {
+    f.sending = false; f.error = 'Could not send. Check your signal and tap again.'; rerenderKeepScroll();
+  }
+  call('submitIssue', [payload], function (r) {
+    if (!r || r.error === 'server error') { fail(); return; }
+    if (!r.ok) {
+      f.sending = false;
+      if (r.error === 'unknown machine') S.view = 'unknown';
+      else if (r.error === 'unknown issue') { S.msg = 'That issue was already closed. Report it as a new problem.'; S.view = 'msg'; }
+      else if (r.error === 'too many reports') { S.msg = 'Too many reports for this machine right now. Tell your supervisor.'; S.view = 'msg'; }
+      else { S.msg = 'This report could not be accepted. Tell your supervisor.'; S.view = 'msg'; }
+      render(); return;
+    }
+    S.result = {lock: !!r.lock, same: !!f.same}; S.view = 'result'; render();
+  }, fail);
+}
+
+app.addEventListener('click', function (ev) {
+  var b = ev.target.closest('[data-act]');
+  if (!b || b.disabled) return;
+  var d = b.dataset, f = S.form;
+  switch (d.act) {
+    case 'retryload': load(); break;
+    case 'report': startReport(null); break;
+    case 'same': startReport(S.m.open_issues[+d.i]); break;
+    case 'change': S.nameNext = null; S.other = false; S.view = 'name'; render(); break;
+    case 'pick': chooseName(S.m.crew_names[+d.i]); break;
+    case 'someone': S.other = true; render(); var o = document.getElementById('other'); if (o) o.focus(); break;
+    case 'otherok': var v = (document.getElementById('other').value || '').trim().slice(0, 60); if (v) chooseName(v); break;
+    case 'back': S.view = 'machine'; render(); break;
+    case 'cat':
+      var c = S.m.categories[+d.i]; f.cat = f.cat === c ? '' : c;
+      if (f.cat !== S.m.leak_category) f.leak = '';
+      f.error = ''; rerenderKeepScroll(); break;
+    case 'leak': f.leak = d.v; f.error = ''; rerenderKeepScroll(); break;
+    case 'rmphoto': f.photos.splice(+d.i, 1); refreshPhotos(); break;
+    case 'submit': submit(); break;
+    case 'done': load(); break;
+  }
+});
+app.addEventListener('input', function (ev) {
+  if (ev.target.id === 'desc') S.form.desc = ev.target.value;
+  if (ev.target.id === 'other') {
+    var g = document.getElementById('otherGo');
+    if (g) g.disabled = !ev.target.value.trim();
+  }
+});
+app.addEventListener('change', function (ev) {
+  if (ev.target.id !== 'photoIn') return;
+  var f = S.form, files = Array.prototype.slice.call(ev.target.files || [], 0, MAX_PHOTOS - f.photos.length);
+  ev.target.value = '';
+  f.photoErr = false;
+  files.forEach(function (file) {
+    f.busy++;
+    downscale(file, function (data) {
+      f.busy--;
+      if (data && f.photos.length < MAX_PHOTOS) f.photos.push({preview: data, base64: data.split(',')[1]});
+      else if (!data) f.photoErr = true;
+      if (S.form === f && S.view === 'form') refreshPhotos();
+    });
+  });
+  if (files.length) refreshPhotos();
+});
+
+S.name = loadName();
+load();
+</script>
+</body>
+</html>
