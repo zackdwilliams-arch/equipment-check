@@ -66,15 +66,193 @@ textarea { min-height: 76px; resize: vertical; }
 .bar .hint { font-size: 14px; color: var(--stop); margin-bottom: 6px; text-align: center; font-weight: 600; }
 .banner { margin-top: 14px; padding: 16px; border-radius: 10px; }
 .banner .big { font-size: 34px; line-height: 1; }
+.banner.ok { background: var(--ok-bg); color: var(--ok); }
 .banner.warn { background: var(--warn-bg); color: var(--warn); } .banner.stop { background: var(--stop); color: #fff; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 15px; }
+.steps { display: flex; gap: 6px; margin-top: 12px; }
+.steps span { flex: 1; text-align: center; font-size: 12px; font-weight: 700; padding: 5px 2px; border-radius: 4px; background: var(--surface); color: var(--muted); border: 1px solid var(--line); }
+.steps span.d { background: var(--ok-bg); color: var(--ok); border-color: var(--ok); }
+.steps span.a { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.donerow { margin-top: 10px; width: 100%; min-height: 46px; display: flex; justify-content: space-between; gap: 10px; padding: 14px 12px; border-radius: 10px; border: 1px solid var(--ok); background: var(--ok-bg); color: var(--ok); font: 600 15px var(--body); text-align: left; }
+.locked { margin-top: 10px; padding: 14px 12px; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); font-weight: 600; }
+.more { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); display: flex; flex-direction: column; gap: 8px; }
+.lab { font-weight: 600; margin-bottom: 8px; }
+.lab small { display: block; font-weight: 400; font-size: 13px; line-height: 1.3; color: var(--muted); margin-top: 2px; }
+.miles { display: flex; gap: 8px; } .miles input { flex: 1; min-width: 0; font-size: 22px; font-variant-numeric: tabular-nums; }
 button { cursor: pointer; } button:focus-visible, .photo:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
 </style>
 </head>
 <body>
 <div id="app"><p class="muted" style="padding-top:24px">Loading&hellip;</p></div>
 <script>
-var RULES = {"issue_categories": ["Won't start", "Fluid leak", "Hydraulics", "Tires / tracks", "Blades / deck", "Lights / electrical", "Brakes", "Damage", "Other"], "leak_category": "Fluid leak", "leak_answers": ["none", "drip", "active"], "lockout_when": [{"category": "Fluid leak", "leak": "active"}]};
+var RULES = {"issue_categories": ["Won't start", "Fluid leak", "Hydraulics", "Tires / tracks", "Blades / deck", "Lights / electrical", "Brakes", "Damage", "Other"], "leak_category": "Fluid leak", "leak_answers": ["none", "drip", "active"], "lockout_when": [{"category": "Fluid leak", "leak": "active"}], "inspection": {"sections": [{"key": "hood", "title": "Under the hood", "tip": "Pop the hood. Check each level and look over the belts and hoses."}, {"key": "walk", "title": "Walk-around", "tip": "Walk the vehicle. Look underneath, check the tires, and check the lights against a wall or with a helper."}, {"key": "cab", "title": "In the cab", "tip": "Look for each before you answer."}], "fluids": {"Engine oil": {"tip": "Dipstick: wipe, reinsert, read between the marks."}, "Coolant": {"tip": "Overflow tank between MIN and MAX. Never open a hot cap."}, "Brake fluid": {"tip": "Reservoir at the firewall, between MIN and MAX."}, "Power steering": {"tip": "Reservoir or cap dipstick, at the mark."}, "Transmission": {"tip": "Dipstick, engine warm and running, in park."}, "Washer fluid": {"tip": "Reservoir is not empty."}, "Diesel exhaust fluid": {"tip": "Gauge or tank level, not empty."}, "Hydraulic oil": {"tip": "Sight glass or dipstick with attachments lowered."}}, "brake_fluid": "Brake fluid", "items": [{"key": "belts", "label": "Belts and hoses", "section": "hood", "type": "ok", "tip": "No cracks, fraying or bulges. Nothing loose.", "famis_item": 1}, {"key": "leaks", "label": "Leaks under the vehicle", "section": "walk", "type": "leak", "tip": "Look under the engine and each axle for fresh spots.", "famis_item": 11}, {"key": "brake_lights", "label": "Brake lights", "section": "walk", "type": "brake", "tip": "Back up to a wall or have a helper watch.", "famis_item": 12}, {"key": "lights", "label": "Other lights", "section": "walk", "type": "ok", "tip": "Headlights low and high, turn signals both sides, hazards, reverse.", "famis_item": 12}, {"key": "tires", "label": "Tires", "section": "walk", "type": "ok", "tip": "Every tire: not low, no bulges or cords, tread left.", "famis_item": 16}, {"key": "safety", "label": "Fire extinguisher and first aid kit", "section": "cab", "type": "ok", "tip": "Extinguisher mounted, gauge in the green. Kit in the cab and stocked.", "famis_item": [4, 5]}], "answers": {"fluid": ["ok", "low"], "ok": ["ok", "problem"], "leak": ["ok", "drip", "active"], "brake": ["ok", "one", "both"], "leak_question": ["none", "drip", "active"]}, "extras": [{"key": "brakes", "label": "Brakes", "famis_item": 2}, {"key": "steering", "label": "Steering / suspension", "famis_item": 15}, {"key": "transmission", "label": "Transmission", "famis_item": 17}, {"key": "wheels", "label": "Wheels", "famis_item": 18}, {"key": "horn", "label": "Horn", "famis_item": 9}, {"key": "wipers", "label": "Wipers", "famis_item": 19}, {"key": "seat_belts", "label": "Seat belts", "famis_item": 14}, {"key": "glass", "label": "Glass", "famis_item": 8}, {"key": "doors", "label": "Doors / locks", "famis_item": 3}, {"key": "gauges", "label": "Gauges / interior lights", "famis_item": 10}, {"key": "fuel_cap", "label": "Fuel cap / tank", "famis_item": 7}, {"key": "other", "label": "Other", "famis_item": 20}], "famis": {"fluids_item": 6, "leaks_item": 11, "mileage_item": 13, "item_count": 20}}};
+// Monthly inspection evaluator: the twin of rules.evaluate_inspection (Python).
+// Embedded by build.py into the Apps Script and the page; ES5 only.
+// Returns {ok:true, miles, lock, lock_reason, findings:[{key,title,note,lock,famis_items}],
+//   logged:[...], famis_fail:{n: comment}, fluids_comment}
+// or {ok:false, error:"<reason>"} where the Python raises ValueError. Never throws.
+function evaluateInspection(rules, answers, fluids) {
+  var COMMENT_LIMIT = 250;
+  var LEAK_WORDS = {none: 'no leak', drip: 'slow drip', active: 'active leak'};
+
+  function has(obj, key) { return Object.prototype.hasOwnProperty.call(obj, key); }
+  function isMap(v) { return v !== null && typeof v === 'object' && !Array.isArray(v); }
+  function fail(msg) { return {ok: false, error: msg}; }
+  function inList(list, v) { return typeof v === 'string' && list.indexOf(v) !== -1; }
+  function sameSet(mapKeys, list) {
+    var i;
+    for (i = 0; i < mapKeys.length; i++) { if (list.indexOf(mapKeys[i]) === -1) { return false; } }
+    for (i = 0; i < list.length; i++) { if (mapKeys.indexOf(list[i]) === -1) { return false; } }
+    return true;
+  }
+  function nums(v) { return Array.isArray(v) ? v.slice() : [v]; }
+
+  var findings = [];
+  function add(k, title, note, lock, items) {
+    findings.push({key: k, title: title, note: note, lock: lock, famis_items: items});
+  }
+
+  try {
+    var spec = rules && rules.inspection;
+    if (!isMap(spec)) { return fail('no inspection rules'); }
+    if (!isMap(answers)) { return fail('answers must be a mapping'); }
+    if (!Array.isArray(fluids)) { return fail('fluids must be a list'); }
+    var allowed = spec.answers, famis = spec.famis, brakeFluid = spec.brake_fluid;
+    var fluidItems = [famis.fluids_item], leaksItem = famis.leaks_item;
+
+    var milesRaw = (answers.miles === undefined || answers.miles === null) ? '' : String(answers.miles);
+    if (!/^[0-9]{1,7}$/.test(milesRaw)) { return fail('miles must be 1 to 7 digits'); }
+
+    function section(v) { return (v === undefined || v === null) ? {} : v; }
+    var answeredFluids = section(answers.fluids);
+    var answeredItems = section(answers.items);
+    var notes = section(answers.notes);
+    var extras = section(answers.extras);
+    if (!isMap(answeredFluids) || !isMap(answeredItems) || !isMap(notes) || !isMap(extras)) {
+      return fail('answers have the wrong shape');
+    }
+    var i, key, value;
+    for (i = 0; i < fluids.length; i++) {
+      if (typeof fluids[i] !== 'string') { return fail('fluid names must be strings'); }
+    }
+    if (!sameSet(Object.keys(answeredFluids), fluids)) {
+      return fail('fluid answers do not match the vehicle fluids');
+    }
+    var itemKeys = [];
+    for (i = 0; i < spec.items.length; i++) { itemKeys.push(spec.items[i].key); }
+    if (!sameSet(Object.keys(answeredItems), itemKeys)) {
+      return fail('every checklist item needs exactly one answer');
+    }
+    var noteKeys = Object.keys(notes);
+    for (i = 0; i < noteKeys.length; i++) {
+      if (itemKeys.indexOf(noteKeys[i]) === -1 || typeof notes[noteKeys[i]] !== 'string') {
+        return fail('unknown note: ' + noteKeys[i]);
+      }
+    }
+    var extraKeys = [];
+    for (i = 0; i < spec.extras.length; i++) { extraKeys.push(spec.extras[i].key); }
+    var givenExtras = Object.keys(extras);
+    for (i = 0; i < givenExtras.length; i++) {
+      if (extraKeys.indexOf(givenExtras[i]) === -1 || typeof extras[givenExtras[i]] !== 'string') {
+        return fail('unknown extra: ' + givenExtras[i]);
+      }
+    }
+
+    var logged = [], commentParts = [];
+
+    for (i = 0; i < fluids.length; i++) {
+      var name = fluids[i];
+      if (!has(spec.fluids, name)) { return fail('unknown fluid: ' + name); }
+      var entry = answeredFluids[name];
+      if (!isMap(entry)) { return fail('fluid answer must be a mapping: ' + name); }
+      var state = entry.state;
+      if (!inList(allowed.fluid, state)) { return fail('unknown fluid answer'); }
+      var leak = (entry.leak === undefined) ? null : entry.leak;
+      if (leak !== null && !inList(allowed.leak_question, leak)) { return fail('unknown leak answer'); }
+      if (state === 'ok') { commentParts.push(name + ' OK'); continue; }
+      if (name === brakeFluid) {
+        var title = name + ' low', items = fluidItems.slice();
+        if (leak === 'drip' || leak === 'active') {
+          title += (leak === 'drip') ? ', slow drip' : ', active leak';
+          items = fluidItems.concat([leaksItem]);
+        }
+        add('fluid:' + name, title, '', true, items);
+        commentParts.push(leak ? name + ' low (' + LEAK_WORDS[leak] + ')' : name + ' low');
+        continue;
+      }
+      if (leak === null) { return fail(name + ' is low and needs a leak answer'); }
+      commentParts.push(name + ' low (' + LEAK_WORDS[leak] + ')');
+      if (leak === 'none') {
+        logged.push(name + ' low, no leak, topped off');
+      } else if (leak === 'drip') {
+        add('fluid:' + name, name + ' low, slow drip', '', false, [leaksItem]);
+      } else {
+        add('fluid:' + name, name + ' low, active leak', '', true, fluidItems.concat([leaksItem]));
+      }
+    }
+
+    for (i = 0; i < spec.items.length; i++) {
+      var item = spec.items[i];
+      key = item.key;
+      value = answeredItems[key];
+      if (!has(allowed, item.type) || !inList(allowed[item.type], value)) {
+        return fail('unknown ' + key + ' answer');
+      }
+      if (value === 'ok') { continue; }
+      var inums = nums(item.famis_item);
+      var note = has(notes, key) ? notes[key] : '';
+      if (item.type === 'leak') {
+        add(key, (value === 'drip' ? 'Slow drip' : 'Active leak') + ' under the vehicle', note,
+            value === 'active', inums);
+      } else if (item.type === 'brake') {
+        add(key, value === 'one' ? 'One brake light out' : 'Both brake lights out', note,
+            value === 'both', inums);
+      } else {
+        add(key, item.label + ' problem', note, false, inums);
+      }
+    }
+
+    for (i = 0; i < spec.extras.length; i++) {
+      var extra = spec.extras[i];
+      if (has(extras, extra.key)) {
+        add('extra:' + extra.key, extra.label, extras[extra.key], false, nums(extra.famis_item));
+      }
+    }
+
+    var pieces = {}, order = [], j, n;
+    for (i = 0; i < findings.length; i++) {
+      var f = findings[i];
+      var text = f.note ? f.title + ': ' + f.note : f.title;
+      for (j = 0; j < f.famis_items.length; j++) {
+        n = f.famis_items[j];
+        if (!has(pieces, n)) { pieces[n] = []; order.push(n); }
+        pieces[n].push(text);
+      }
+    }
+    order.sort(function (a, b) { return a - b; });
+    var famisFail = {};
+    for (i = 0; i < order.length; i++) {
+      famisFail[String(order[i])] = pieces[order[i]].join('; ').slice(0, COMMENT_LIMIT);
+    }
+
+    var lockReason = '', locked = false;
+    for (i = 0; i < findings.length; i++) {
+      if (findings[i].lock) { locked = true; lockReason = findings[i].title; break; }
+    }
+    return {
+      ok: true,
+      miles: parseInt(milesRaw, 10),
+      lock: locked,
+      lock_reason: lockReason,
+      findings: findings,
+      logged: logged,
+      famis_fail: famisFail,
+      fluids_comment: commentParts.join('; ')
+    };
+  } catch (err) {
+    return fail('could not evaluate: ' + String(err && err.message ? err.message : err));
+  }
+}
 var EQ = (new URLSearchParams(location.search).get('eq') || '').slice(0, 200);
 var KEY = (new URLSearchParams(location.search).get('k') || '').slice(0, 200);
 // Where the static build posts. Blank in the Apps Script build, which uses google.script.run.
@@ -82,9 +260,18 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwNd8BDevvicxK8lrmDzt8SAp
 var LEAK_LABEL = {none: 'No leak', drip: 'Slow drip', active: 'Active leak'};
 var LEAK_TONE = {none: 'ok', drip: 'warn', active: 'stop'};
 var MAX_PHOTOS = 4;
+var MAX_INSP_PHOTOS = 8;
+var ANS_LABEL = {
+  fluid: {ok: 'OK', low: 'Low'},
+  ok: {ok: 'OK', problem: 'Problem'},
+  leak: {ok: 'None', drip: 'Slow drip', active: 'Active leak'},
+  brake: {ok: 'Both work', one: 'One out', both: 'Both out'},
+  leak_question: {none: 'No leak', drip: 'Slow drip', active: 'Active leak'}
+};
+var ANS_TONE = {ok: 'ok', none: 'ok', low: 'warn', problem: 'warn', drip: 'warn', one: 'warn', active: 'stop', both: 'stop'};
 var MAX_EDGE = 1600;
 
-var S = {view: 'loading', m: null, name: '', other: false, nameNext: null, form: null, result: null};
+var S = {view: 'loading', m: null, name: '', other: false, nameNext: null, form: null, insp: null, result: null};
 var app = document.getElementById('app');
 
 function esc(s) {
@@ -120,7 +307,7 @@ function call(fn, args, onOk, onFail) {
   // A hung request must not freeze the page: abort it and take the same path as a network error.
   // Resending is safe, the server dedupes by submission id. No AbortController: no timeout, no crash.
   var ctl = typeof AbortController === 'function' ? new AbortController() : null;
-  var timer = ctl ? setTimeout(function () { ctl.abort(); }, fn === 'submitIssue' ? 90000 : 30000) : null;
+  var timer = ctl ? setTimeout(function () { ctl.abort(); }, fn === 'submitIssue' || fn === 'submitInspection' ? 90000 : 30000) : null;
   function stop() { if (timer) clearTimeout(timer); }
   var opts = {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'},
     body: JSON.stringify(body), credentials: 'omit', redirect: 'follow', cache: 'no-store'};
@@ -165,6 +352,15 @@ function vMachine() {
     h += '<div class="card"><b>Already reported: ' + esc(o.title) + '</b><p class="muted">' + esc(shortDate(o.reported_at)) +
       ' &middot; ' + esc(o.status) + '</p><button class="back" type="button" data-act="same" data-i="' + i + '">Same problem? Add a note or photo</button></div>';
   });
+  var ins = m.inspection;
+  if (ins && !ins.done_this_month) h += '<button class="cta" type="button" data-act="inspect">MONTHLY INSPECTION</button>';
+  else if (ins) {
+    var last = ins.last || {};
+    var bits = ['Inspected ' + shortDate(last.date) + (last.by ? ' by ' + last.by : '')];
+    if (last.miles != null && last.miles !== '') bits.push(last.miles + ' mi');
+    if (last.outcome) bits.push(last.outcome);
+    h += '<div class="card"><b>' + esc(bits.join(', ')) + '</b></div>';
+  }
   h += '<button class="cta" type="button" data-act="report">REPORT A PROBLEM</button></div>';
   if (S.name) h += '<p class="muted" style="margin-top:14px">Reporting as ' + esc(S.name) + ' &middot; <button class="back" type="button" data-act="change">change</button></p>';
   return h;
@@ -237,9 +433,342 @@ function vForm() {
   return h + bar(f);
 }
 
+// ---- Monthly inspection -------------------------------------------------------------------
+// Sections run in order: Mileage, then the rules' sections. The first section not yet closed
+// is the open one; later ones show locked. Answers are kept when a section is reopened.
+function inspSections() {
+  return [{key: 'miles', title: 'Mileage'}].concat(RULES.inspection.sections);
+}
+function activeSec() {
+  var secs = inspSections(), i;
+  for (i = 0; i < secs.length; i++) if (!S.insp.closed[secs[i].key]) return secs[i].key;
+  return null;
+}
+function secRows(key) {
+  var rows = [];
+  if (key === 'hood') S.m.inspection.fluids.forEach(function (n) { rows.push({kind: 'fluid', name: n}); });
+  RULES.inspection.items.forEach(function (it) { if (it.section === key) rows.push({kind: 'item', item: it}); });
+  return rows;
+}
+function rowValue(r) {
+  return r.kind === 'fluid' ? (S.insp.fluids[r.name] || {}).state : S.insp.items[r.item.key];
+}
+function rowWaiting(r) {
+  if (r.kind !== 'fluid') return false;
+  var e = S.insp.fluids[r.name] || {};
+  return e.state === 'low' && r.name !== RULES.inspection.brake_fluid && !e.leak;
+}
+function rowMarked(r) {
+  var v = rowValue(r);
+  return !!v && v !== 'ok';
+}
+function secLeft(key) { return secRows(key).filter(function (r) { return !rowValue(r); }).length; }
+function secWaiting(key) { return secRows(key).filter(rowWaiting).length; }
+function secComplete(key) { return secLeft(key) === 0 && secWaiting(key) === 0; }
+function validMiles(v) { return /^[0-9]{1,7}$/.test(String(v || '')); }
+
+function fluidVerdict(name, leak) {
+  if (name === RULES.inspection.brake_fluid) return ['stop', 'Do not operate. Low brake fluid locks this vehicle out.'];
+  if (leak === 'active') return ['stop', 'Do not operate. An active leak locks this machine out.'];
+  if (leak === 'drip') return ['warn', 'Top it off and keep working. The fleet mechanic gets a repair request.'];
+  if (leak === 'none') return ['ok', 'Top it off. Nothing else needed.'];
+  return null;
+}
+
+function saveDraft() {
+  var I = S.insp;
+  try {
+    sessionStorage.setItem('eq_insp_' + EQ, JSON.stringify({eq: EQ, sid: I.sid, miles: I.miles, fluids: I.fluids,
+      items: I.items, notes: I.notes, extras: I.extras, closed: I.closed}));
+  } catch (e) {}
+}
+function clearDraft() { try { sessionStorage.removeItem('eq_insp_' + EQ); } catch (e) {} }
+function loadDraft() {
+  try {
+    var d = JSON.parse(sessionStorage.getItem('eq_insp_' + EQ) || 'null');
+    return d && d.eq === EQ && d.sid ? d : null;
+  } catch (e) { return null; }
+}
+
+function openInspection() {
+  var d = loadDraft() || {};
+  S.insp = {sid: d.sid || newId(), miles: d.miles || '', fluids: d.fluids || {}, items: d.items || {}, notes: d.notes || {},
+    extras: d.extras || {}, closed: d.closed || {}, photos: [], busy: 0, photoErr: false, sending: false, error: '', timer: null};
+  S.view = 'insp'; render();
+}
+function startInspection() {
+  if (!S.name) { S.nameNext = openInspection; S.other = false; S.view = 'name'; render(); }
+  else openInspection();
+}
+
+function inspPhotoControl(item, label) {
+  var I = S.insp, h = '';
+  if (I.photos.length + I.busy < MAX_INSP_PHOTOS) {
+    h += '<label class="photo"><span>' + esc(label || 'Add photo') + '</span><input type="file" accept="image/*" capture="environment" data-item="' + esc(item) + '"></label>';
+  }
+  var mine = I.photos.map(function (p, i) { return {p: p, i: i}; }).filter(function (x) { return x.p.item === item; });
+  if (mine.length) {
+    h += '<div class="thumbs">' + mine.map(function (x) {
+      return '<div class="thumb"><img src="' + esc(x.p.preview) + '" alt="Photo"><button type="button" data-act="rmiphoto" data-i="' + x.i +
+        '" aria-label="Remove photo"><span>&times;</span></button></div>';
+    }).join('') + '</div>';
+  }
+  return h;
+}
+function dropPhotos(item) {
+  S.insp.photos = S.insp.photos.filter(function (p) { return p.item !== item; });
+}
+
+function segHtml(type, cur, attrs) {
+  return '<div class="seg">' + RULES.inspection.answers[type].map(function (a) {
+    var on = cur === a;
+    return '<button type="button" ' + attrs + ' data-v="' + esc(a) + '" class="' + (on ? 'on ' + (ANS_TONE[a] || 'warn') : '') +
+      '" aria-pressed="' + on + '">' + esc(ANS_LABEL[type][a] || a) + '</button>';
+  }).join('') + '</div>';
+}
+function sayHtml(v) { return v ? '<div class="say ' + v[0] + '" style="margin-top:0">' + esc(v[1]) + '</div>' : ''; }
+
+function inspRowHtml(r) {
+  var I = S.insp, lab, tip, seg, more = '';
+  if (r.kind === 'fluid') {
+    var e = I.fluids[r.name] || {}, spec = RULES.inspection.fluids[r.name] || {};
+    lab = r.name; tip = spec.tip;
+    seg = segHtml('fluid', e.state, 'data-act="fl" data-i="' + S.m.inspection.fluids.indexOf(r.name) + '"');
+    if (e.state === 'low') {
+      if (r.name === RULES.inspection.brake_fluid) more = sayHtml(fluidVerdict(r.name, ''));
+      else {
+        more = '<b>Any sign of a leak?</b>' +
+          segHtml('leak_question', e.leak, 'data-act="flleak" data-i="' + S.m.inspection.fluids.indexOf(r.name) + '"') +
+          sayHtml(fluidVerdict(r.name, e.leak));
+        if (e.leak && e.leak !== 'none') more += inspPhotoControl('fluid:' + r.name, 'Photo of the leak');
+      }
+    }
+  } else {
+    var it = r.item, v = I.items[it.key];
+    lab = it.label; tip = it.tip;
+    seg = segHtml(it.type, v, 'data-act="item" data-k="' + esc(it.key) + '"');
+    if (v && v !== 'ok') {
+      if (it.type === 'ok') {
+        more = '<input type="text" maxlength="200" data-ni="' + esc(it.key) + '" placeholder="What is wrong? (optional)" value="' + esc(I.notes[it.key] || '') + '">' +
+          inspPhotoControl(it.key);
+      } else {
+        var stop = v === 'active' || v === 'both';
+        more = sayHtml(stop ? ['stop', 'Do not operate. This locks the vehicle out.'] : ['warn', 'Keep working. The fleet mechanic gets a repair request.']);
+        if (it.type === 'leak') more += inspPhotoControl(it.key, 'Photo of the leak');
+      }
+    }
+  }
+  return '<div class="row"><div class="lab">' + esc(lab) + (tip ? '<small>' + esc(tip) + '</small>' : '') + '</div>' + seg +
+    (more ? '<div class="more">' + more + '</div>' : '') + '</div>';
+}
+
+function secSummary(key) {
+  if (key === 'miles') return S.insp.miles + ' mi';
+  var n = secRows(key).filter(rowMarked).length;
+  return n ? n + ' marked' : 'all OK';
+}
+function doneRowHtml(sec) {
+  return '<button class="donerow" type="button" data-act="reopen" data-s="' + esc(sec.key) + '"><span>&#10003; ' + esc(sec.title) +
+    '</span><span>' + esc(secSummary(sec.key)) + ' &middot; change</span></button>';
+}
+
+// The answers object the server validates, built from what has been tapped so far.
+function buildAnswers() {
+  var I = S.insp, a = {miles: I.miles, fluids: {}, items: {}, notes: {}, extras: {}};
+  S.m.inspection.fluids.forEach(function (n) {
+    var e = I.fluids[n];
+    if (e && e.state) { a.fluids[n] = {state: e.state}; if (e.leak) a.fluids[n].leak = e.leak; }
+  });
+  RULES.inspection.items.forEach(function (it) {
+    var v = I.items[it.key];
+    if (!v) return;
+    a.items[it.key] = v;
+    if (it.type === 'ok' && v === 'problem' && I.notes[it.key]) a.notes[it.key] = I.notes[it.key];
+  });
+  RULES.inspection.extras.forEach(function (x) {
+    if (Object.prototype.hasOwnProperty.call(I.extras, x.key)) a.extras[x.key] = I.extras[x.key] || '';
+  });
+  return a;
+}
+
+function inspBar(act) {
+  var I = S.insp, label = 'FINISH EACH SECTION ABOVE', dis = true, cls = '';
+  if (I.sending) label = 'SENDING…';
+  else if (!act) {
+    var ev = evaluateInspection(RULES, buildAnswers(), S.m.inspection.fluids);
+    if (ev.ok) {
+      dis = I.busy > 0;
+      if (ev.lock) { label = 'SUBMIT AND LOCK OUT'; cls = ' stop'; }
+      else if (ev.findings.length) label = 'SUBMIT &middot; ' + ev.findings.length + ' ISSUE' + (ev.findings.length > 1 ? 'S' : '');
+      else label = 'ALL GOOD &middot; SUBMIT';
+    }
+  }
+  return '<div class="bar"><div>' + (I.error ? '<div class="hint">' + esc(I.error) + '</div>' : '') +
+    '<button class="cta' + cls + '" type="button" data-act="inspsubmit"' + (dis ? ' disabled' : '') + '>' + label + '</button></div></div>';
+}
+
+function vInsp() {
+  var I = S.insp, secs = inspSections(), act = activeSec(), h = head();
+  h += '<button class="back" type="button" data-act="insback">&#8592; Machine</button>';
+  h += '<div class="steps">' + secs.map(function (s) {
+    return '<span class="' + (I.closed[s.key] ? 'd' : s.key === act ? 'a' : '') + '">' + esc(s.title) + '</span>';
+  }).join('') + '</div>';
+  secs.forEach(function (sec, idx) {
+    var k = sec.key;
+    if (I.closed[k]) h += doneRowHtml(sec);
+    else if (k !== act) h += '<div class="locked">' + esc(sec.title) + '</div>';
+    else if (k === 'miles') {
+      h += '<h2>Mileage</h2><div class="row"><div class="miles"><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="7" id="miles" placeholder="Odometer" autocomplete="off" value="' + esc(I.miles) + '">' +
+        '</div><div style="margin-top:10px">' + inspPhotoControl('miles', 'Photo of the odometer') + '</div></div>' +
+        '<button class="cta" style="margin-top:10px" type="button" id="milesGo" data-act="secnext" data-s="miles"' + (validMiles(I.miles) ? '' : ' disabled') + '>NEXT</button>';
+    } else {
+      var left = secLeft(k), waiting = secWaiting(k);
+      h += '<button class="back" type="button" data-act="secback">&#8592; Back</button><h2>' + esc(sec.title) + '</h2>' +
+        (sec.tip ? '<p class="muted" style="margin-bottom:8px">' + esc(sec.tip) + '</p>' : '') +
+        '<div class="stack">' + secRows(k).map(inspRowHtml).join('') + '</div>' +
+        '<button class="cta" style="margin-top:10px" type="button" data-act="secnext" data-s="' + esc(k) + '"' + (left || waiting ? ' disabled' : '') + '>' +
+        (left ? left + ' LEFT TO CHECK' : waiting ? 'ANSWER THE LEAK QUESTION' : 'NEXT') + '</button>';
+    }
+  });
+  if (!act) {
+    h += '<h2>Anything else you know about?</h2><div class="chips">' + RULES.inspection.extras.map(function (x) {
+      var on = Object.prototype.hasOwnProperty.call(I.extras, x.key);
+      return '<button type="button" data-act="chip" data-k="' + esc(x.key) + '" class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '">' + esc(x.label) + '</button>';
+    }).join('') + '</div><div class="stack" style="margin-top:10px">';
+    RULES.inspection.extras.forEach(function (x) {
+      if (!Object.prototype.hasOwnProperty.call(I.extras, x.key)) return;
+      h += '<div class="row"><div class="lab">' + esc(x.label) + '</div><div class="more"><input type="text" maxlength="200" data-xi="' + esc(x.key) +
+        '" placeholder="What is it doing?" value="' + esc(I.extras[x.key]) + '">' + inspPhotoControl('extra:' + x.key) + '</div></div>';
+    });
+    h += '</div>';
+  } else h += '<div class="locked">Anything else you know about?</div>';
+  return h + inspBar(act);
+}
+
+// After an answer tap: a pending advance is always cancelled; a new one is scheduled only
+// when this answer was the passing one and the open section is complete with nothing waiting.
+function afterAnswer(passing) {
+  var I = S.insp, sec = activeSec();
+  if (I.timer) { clearTimeout(I.timer); I.timer = null; }
+  saveDraft();
+  if (passing && sec && secComplete(sec)) {
+    I.timer = setTimeout(function () {
+      I.timer = null;
+      if (S.view === 'insp' && S.insp === I && activeSec() === sec && secComplete(sec)) {
+        I.closed[sec] = true; saveDraft(); render();
+      }
+    }, 250);
+  }
+  rerenderKeepScroll();
+}
+
+function inspPhotoAdd(input, item) {
+  var I = S.insp, room = MAX_INSP_PHOTOS - I.photos.length - I.busy;
+  var files = Array.prototype.slice.call(input.files || [], 0, Math.max(0, room));
+  input.value = '';
+  I.photoErr = false;
+  files.forEach(function (file) {
+    I.busy++;
+    downscale(file, function (data) {
+      I.busy--;
+      if (data && I.photos.length < MAX_INSP_PHOTOS) I.photos.push({item: item, preview: data, base64: data.split(',')[1]});
+      else if (!data) I.photoErr = true;
+      if (S.insp === I && S.view === 'insp') rerenderKeepScroll();
+    });
+  });
+  if (files.length) rerenderKeepScroll();
+}
+
+function submitInspection() {
+  var I = S.insp;
+  if (I.sending) return;
+  var answers = buildAnswers(), ev = evaluateInspection(RULES, answers, S.m.inspection.fluids);
+  if (!ev.ok) return;
+  I.sending = true; I.error = ''; rerenderKeepScroll();
+  var payload = {submission_id: I.sid, equip_id: EQ, key: KEY, submitter: S.name, answers: answers,
+    photos: I.photos.map(function (p) { return {item: p.item, base64: p.base64}; })};
+  function fail() {
+    I.sending = false; I.error = 'Could not send. Check your signal and tap again.'; rerenderKeepScroll();
+  }
+  call('submitInspection', [payload], function (r) {
+    if (!r || r.error === 'server error') { fail(); return; }
+    if (!r.ok) {
+      I.sending = false;
+      if (r.error === 'unknown machine') S.view = 'unknown';
+      else if (r.error === 'already inspected') { clearDraft(); S.insp = null; S.msg = 'This vehicle was already inspected this month. Report anything new as a problem.'; S.view = 'msg'; }
+      else if (r.error === 'too many reports') { S.msg = 'Too many reports for this machine right now. Tell your supervisor.'; S.view = 'msg'; }
+      else { S.msg = 'This report could not be accepted. Tell your supervisor.'; S.view = 'msg'; }
+      render(); return;
+    }
+    clearDraft(); S.insp = null;
+    S.result = {insp: true, lock: !!r.lock || ev.lock, findings: ev.findings.length}; S.view = 'result'; render();
+  }, fail);
+}
+
+function inspClick(d) {
+  var I = S.insp, e, secs, i;
+  switch (d.act) {
+    case 'insback': if (I.timer) { clearTimeout(I.timer); I.timer = null; } S.view = 'machine'; render(); break;
+    case 'secnext':
+      if (d.s === 'miles' && !validMiles(I.miles)) break;
+      if (d.s !== 'miles' && !secComplete(d.s)) break;
+      I.closed[d.s] = true; saveDraft(); render(); break;
+    case 'secback':
+      secs = inspSections(); i = -1;
+      secs.forEach(function (s, n) { if (s.key === activeSec()) i = n; });
+      if (i > 0) { if (I.timer) { clearTimeout(I.timer); I.timer = null; } I.closed[secs[i - 1].key] = false; saveDraft(); render(); }
+      break;
+    case 'reopen':
+      if (I.timer) { clearTimeout(I.timer); I.timer = null; }
+      I.closed[d.s] = false; saveDraft(); render(); break;
+    case 'fl':
+      var name = S.m.inspection.fluids[+d.i];
+      e = I.fluids[name] || (I.fluids[name] = {});
+      e.state = d.v;
+      if (d.v === 'ok' || name === RULES.inspection.brake_fluid) { delete e.leak; dropPhotos('fluid:' + name); }
+      afterAnswer(d.v === 'ok'); break;
+    case 'flleak':
+      var fname = S.m.inspection.fluids[+d.i];
+      e = I.fluids[fname] || (I.fluids[fname] = {});
+      e.leak = d.v;
+      if (d.v === 'none') dropPhotos('fluid:' + fname);
+      afterAnswer(d.v === 'none'); break;
+    case 'item':
+      I.items[d.k] = d.v;
+      if (d.v === 'ok') { delete I.notes[d.k]; dropPhotos(d.k); }
+      else if (d.v !== 'problem') delete I.notes[d.k];
+      afterAnswer(d.v === 'ok'); break;
+    case 'chip':
+      if (Object.prototype.hasOwnProperty.call(I.extras, d.k)) { delete I.extras[d.k]; dropPhotos('extra:' + d.k); }
+      else I.extras[d.k] = '';
+      saveDraft(); rerenderKeepScroll(); break;
+    case 'rmiphoto': I.photos.splice(+d.i, 1); rerenderKeepScroll(); break;
+    case 'inspsubmit': submitInspection(); break;
+    default: return false;
+  }
+  return true;
+}
+function inspInput(t) {
+  var I = S.insp, d = t.dataset || {};
+  if (!I) return false;
+  if (t.id === 'miles') {
+    var v = String(t.value || '').replace(/[^0-9]/g, '').slice(0, 7);
+    if (v !== t.value) t.value = v;
+    I.miles = v; saveDraft();
+    var g = document.getElementById('milesGo');
+    if (g) g.disabled = !validMiles(v);
+    return true;
+  }
+  if (d.ni) { I.notes[d.ni] = t.value; saveDraft(); return true; }
+  if (d.xi) { I.extras[d.xi] = t.value; saveDraft(); return true; }
+  return false;
+}
+
 function vResult() {
   var r = S.result, h = '<div style="padding-top:20px"></div>';
   if (r.lock) h += bannerHtml('stop', 'DO NOT OPERATE', 'This machine is locked out. Hang the tag on the key and leave it parked.');
+  else if (r.insp && !r.findings) h += bannerHtml('ok', 'INSPECTION DONE', 'Nothing to fix. Thanks.');
+  else if (r.insp) h += bannerHtml('warn', 'SENT TO THE FLEET MECHANIC', 'You can keep working. The repair request is in.');
   else if (r.same) h += bannerHtml('warn', 'ADDED TO THE OPEN ISSUE', 'The fleet mechanic already has this one. Your note and photo were added.');
   else h += bannerHtml('warn', 'SENT TO THE FLEET MECHANIC', 'You can keep working. The repair request is in.');
   return h + '<div style="margin-top:18px"><button class="cta" type="button" data-act="done">DONE</button></div>';
@@ -253,6 +782,7 @@ function render() {
   else if (v === 'machine') app.innerHTML = vMachine();
   else if (v === 'name') app.innerHTML = vName();
   else if (v === 'form') app.innerHTML = vForm();
+  else if (v === 'insp') app.innerHTML = vInsp();
   else if (v === 'result') app.innerHTML = vResult();
   else app.innerHTML = '<p class="muted" style="padding-top:24px">Loading&hellip;</p>';
   window.scrollTo(0, 0);
@@ -334,6 +864,7 @@ app.addEventListener('click', function (ev) {
   switch (d.act) {
     case 'retryload': load(); break;
     case 'report': startReport(null); break;
+    case 'inspect': startInspection(); break;
     case 'same': startReport(S.m.open_issues[+d.i]); break;
     case 'change': S.nameNext = null; S.other = false; S.view = 'name'; render(); break;
     case 'pick': chooseName(S.m.crew_names[+d.i]); break;
@@ -348,9 +879,11 @@ app.addEventListener('click', function (ev) {
     case 'rmphoto': f.photos.splice(+d.i, 1); refreshPhotos(); break;
     case 'submit': submit(); break;
     case 'done': load(); break;
+    default: if (S.view === 'insp' && S.insp) inspClick(d);
   }
 });
 app.addEventListener('input', function (ev) {
+  if (S.view === 'insp' && inspInput(ev.target)) return;
   if (ev.target.id === 'desc') S.form.desc = ev.target.value;
   if (ev.target.id === 'other') {
     var g = document.getElementById('otherGo');
@@ -358,6 +891,8 @@ app.addEventListener('input', function (ev) {
   }
 });
 app.addEventListener('change', function (ev) {
+  var tag = ev.target.dataset && ev.target.dataset.item;
+  if (tag && S.insp) { inspPhotoAdd(ev.target, tag); return; }
   if (ev.target.id !== 'photoIn') return;
   var f = S.form, files = Array.prototype.slice.call(ev.target.files || [], 0, MAX_PHOTOS - f.photos.length);
   ev.target.value = '';
